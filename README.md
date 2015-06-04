@@ -21,3 +21,20 @@ rails new your_app_name -T -d postgresql -m 'seed/template.rb'
 * Factory girl
 
 Databases are created. Files are committed to git in their final state.
+
+## Other requirements
+
+To create and run JavaScript Cucumber tests, tag the scenarios with 
+`@javascript` and make sure you have PhantomJS installed:
+
+OSX: `brew install phantomjs`
+
+## Test helpers
+
+See the `/features/support/general_steps.rb` file for handy Cucumber steps.
+
+If you have defined a model as `@model_name` in a previous step, then using
+`When I visit the edit model name page` will automatically follow the correct 
+path.
+
+Add extra non-standard path names to `/features/support/paths.rb`

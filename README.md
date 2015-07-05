@@ -38,3 +38,8 @@ If you have defined a model as `@model_name` in a previous step, then using
 path.
 
 Add extra non-standard path names to `/features/support/paths.rb`
+
+## VCR 
+
+Use the @vcr tag on Cucumber features to cause a new casette to be created
+as `/fixtures/vcr_cassettes/feature_name/sceanrio_name.yml`

@@ -17,14 +17,16 @@ gem_group :test do
   gem 'spring-commands-cucumber'
   gem 'spring-commands-rspec'
   gem 'capybara'
+  gem 'poltergeist'
   gem 'factory_girl_rails'
   gem 'faker'
   gem 'capybara-screenshot'
   gem 'site_prism'
+  gem 'webmock'
+  gem 'vcr'
 end
 
 run 'bundle install'
-
 
 generate 'cucumber:install'
 generate 'rspec:install'
@@ -82,7 +84,7 @@ World(NavigationHelpers)
 FILE
 end
 
-create_file 'features/steps/general_steps.rb' do
+create_file 'features/step_definitions/general_steps.rb' do
 <<-'FILE'
 When(/^I visit the (.*) page$/) do |page_name|
   visit path_to page_name
@@ -117,7 +119,36 @@ Capybara.javascript_driver = :poltergeist
 FILE
 end
 
-gsub_file 'spec/support/factory_girl.rb', 'end', "  config.include FactoryGirl::Syntax::Methods\nend"
+gsub_file 'spec/rails_helper.rb', /^end/, "  config.include FactoryGirl::Syntax::Methods\nend"
+
+gsub_file 'spec/rails_helper.rb', /require 'rspec\/rails'/, "require 'rspec/rails'\nrequire 'webmock/rspec'\nrequire 'support/vcr_setup'"
+create_file 'features/support/webmock.rb' do
+<<-'FILE'
+require 'webmock/cucumber'
+FILE
+end
+
+create_file 'spec/support/vcr_setup.rb' do
+<<-'FILE'
+require 'vcr'
+
+VCR.configure do |c|
+  c.cassette_library_dir = 'fixtures/vcr_cassettes'
+  c.hook_into :webmock
+end
+FILE
+end
+
+create_file 'features/support/vcr.rb' do
+<<-'FILE'
+require File.expand_path("../../../spec/support/vcr_setup", __FILE__)
+
+VCR.cucumber_tags do |t|
+  t.tag  '@vcr', :use_scenario_name => true
+end
+FILE
+end
+
 
 gsub_file 'config/database.yml', 'default: &default', "default: &default\n  user: #{db_username}\n  pass: #{db_pass}"
 rake 'db:create'

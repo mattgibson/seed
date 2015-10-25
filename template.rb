@@ -33,43 +33,15 @@ generate 'rspec:install'
 
 run 'bundle exec spring binstubs'
 
-get 'https://raw.github.com/mattgibson/seed/master/templates/spec/smoke_spec.rb', 'spec/smoke_spec.rb'
-get 'https://raw.github.com/mattgibson/seed/master/templates/features/support/maintain_database.rb', 'features/support/maintain_database.rb'
-get 'https://raw.github.com/mattgibson/seed/master/templates/features/support/pathse.rb', 'features/support/paths.rb'
 
-create_file 'features/step_definitions/general_steps.rb' do
-<<-'FILE'
-When(/^I (?:visit|am on) the (.*) page$/) do |page_name|
-  visit path_to page_name
-end
-
-Then(/^show me a screenshot/) do
-  screenshot_and_open_image
-end
-
-Then(/^show me the page/) do
-  save_and_open_page
-end
-FILE
-end
-
-create_file 'features/support/extra_env.rb' do
-<<-'FILE'
-require 'capybara/poltergeist'
-require 'capybara-screenshot/cucumber'
-
-World FactoryGirl::Syntax::Methods
-
-Before('@no-txn,@selenium,@culerity,@celerity,@javascript') do
-  DatabaseCleaner.strategy = :truncation
-end
-
-Before('~@no-txn', '~@selenium', '~@culerity', '~@celerity', '~@javascript') do
-  DatabaseCleaner.strategy = :transaction
-end
-
-Capybara.javascript_driver = :poltergeist
-FILE
+%w(
+spec/smoke_spec.rb
+features/support/maintain_database.rb
+features/support/paths.rb
+features/step_definitions/general_steps.rb
+features/support/extra_env.rb
+).each do |file|
+  get "https://raw.github.com/mattgibson/seed/master/templates/#{file}", file
 end
 
 gsub_file 'spec/rails_helper.rb', /^end/, "  config.include FactoryGirl::Syntax::Methods\nend"

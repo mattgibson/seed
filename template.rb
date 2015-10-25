@@ -33,17 +33,7 @@ generate 'rspec:install'
 
 run 'bundle exec spring binstubs'
 
-create_file 'spec/smoke_spec.rb' do
-<<-'FILE'
-require 'rails_helper'
-
-describe 'smoke test' do
-  it 'works' do
-    expect(true).to be_truthy
-  end
-end
-FILE
-end
+get 'https://raw.github.com/mattgibson/seed/master/templates/spec/smoke_spec.rb', 'spec/smoke_spec.rb'
 
 create_file 'features/support/maintain_database.rb' do
 <<-'FILE'

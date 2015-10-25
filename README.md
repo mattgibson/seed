@@ -9,8 +9,7 @@ the tests will run.
 ```
 cd parent/directory
 gem install rails
-git clone https://github.com/mattgibson/seed
-rails new your_app_name -T -d postgresql -m 'seed/template.rb'
+rails new your_app_name -T -d postgresql -m 'https://raw.githubusercontent.com/mattgibson/seed/master/template.rb'
 ```
 
 ## What's installed

@@ -47,7 +47,9 @@ features/support/vcr.rb
   get "https://raw.github.com/mattgibson/seed/master/templates/#{file}", file
 end
 
-gsub_file 'spec/rails_helper.rb', /^end/, "  config.include FactoryGirl::Syntax::Methods\nend"
+gsub_file 'spec/rails_helper.rb',
+          /^end/,
+          "  config.include FactoryGirl::Syntax::Methods\nend"
 
 gsub_file 'spec/rails_helper.rb', /require 'rspec\/rails'/, <<-'INSERT'
 require 'rspec/rails'
@@ -60,7 +62,9 @@ end
 
 INSERT
 
-gsub_file 'config/database.yml', 'default: &default', "default: &default\n  user: #{db_username}\n  pass: #{db_pass}"
+gsub_file 'config/database.yml',
+          'default: &default',
+          "default: &default\n  user: #{db_username}\n  pass: #{db_pass}"
 rake 'db:create'
 rake 'db:migrate'
 rake 'db:create', env: 'test'

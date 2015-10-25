@@ -1,4 +1,4 @@
-# This should leave us with a Rails 4 app ready for BDD with Rspec and Cucumber
+# This will leave us with a Rails 4 app ready for BDD with Rspec and Cucumber.
 
 db_username = ask('Postgres user:')
 db_pass = ask('Postgres pass:')
@@ -33,7 +33,7 @@ generate 'rspec:install'
 
 run 'bundle exec spring binstubs'
 
-
+# Get the templates for various files.
 %w(
 spec/smoke_spec.rb
 features/support/maintain_database.rb
@@ -47,6 +47,7 @@ features/support/vcr.rb
   get "https://raw.github.com/mattgibson/seed/master/templates/#{file}", file
 end
 
+# Edit a few files to add stuff we need.
 gsub_file 'spec/rails_helper.rb',
           /^end/,
           "  config.include FactoryGirl::Syntax::Methods\nend"
@@ -65,11 +66,14 @@ INSERT
 gsub_file 'config/database.yml',
           'default: &default',
           "default: &default\n  user: #{db_username}\n  pass: #{db_pass}"
+
+# Set up the databases.
 rake 'db:create'
 rake 'db:migrate'
 rake 'db:create', env: 'test'
 rake 'db:migrate', env: 'test'
 
+# Initialise the project as a git repository.
 after_bundle do
   git :init
   git add: '.'

@@ -40,6 +40,9 @@ features/support/maintain_database.rb
 features/support/paths.rb
 features/step_definitions/general_steps.rb
 features/support/extra_env.rb
+features/support/webmock.rb
+spec/support/vcr_setup.rb
+features/support/vcr.rb
 ).each do |file|
   get "https://raw.github.com/mattgibson/seed/master/templates/#{file}", file
 end
@@ -56,35 +59,6 @@ VCR.configure do |c|
 end
 
 INSERT
-
-create_file 'features/support/webmock.rb' do
-<<-'FILE'
-require 'webmock/cucumber'
-FILE
-end
-
-create_file 'spec/support/vcr_setup.rb' do
-<<-'FILE'
-require 'vcr'
-
-VCR.configure do |c|
-  c.cassette_library_dir = 'fixtures/vcr_cassettes'
-  c.hook_into :webmock
-end
-FILE
-end
-
-create_file 'features/support/vcr.rb' do
-<<-'FILE'
-require File.expand_path("../../../spec/support/vcr_setup", __FILE__)
-
-VCR.cucumber_tags do |t|
-  t.tag  '@vcr', :use_scenario_name => true
-  t.tags '@vcr_new_episodes', :record => :new_episodes
-end
-FILE
-end
-
 
 gsub_file 'config/database.yml', 'default: &default', "default: &default\n  user: #{db_username}\n  pass: #{db_pass}"
 rake 'db:create'

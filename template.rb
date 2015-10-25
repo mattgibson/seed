@@ -1,7 +1,7 @@
 # This should leave us with a Rails 4 app ready for BDD with Rspec and Cucumber
 
-db_username = ask("Postgres user:")
-db_pass = ask("Postgres pass:")
+db_username = ask('Postgres user:')
+db_pass = ask('Postgres pass:')
 
 gem 'pg'
 gem 'haml-rails'
@@ -54,7 +54,6 @@ end
 create_file 'features/support/paths.rb' do
 <<-'FILE'
 module NavigationHelpers
-
   def path_to(page_name)
 
     case page_name
@@ -86,7 +85,7 @@ end
 
 create_file 'features/step_definitions/general_steps.rb' do
 <<-'FILE'
-When(/^I visit the (.*) page$/) do |page_name|
+When(/^I (?:visit|am on) the (.*) page$/) do |page_name|
   visit path_to page_name
 end
 
@@ -121,7 +120,17 @@ end
 
 gsub_file 'spec/rails_helper.rb', /^end/, "  config.include FactoryGirl::Syntax::Methods\nend"
 
-gsub_file 'spec/rails_helper.rb', /require 'rspec\/rails'/, "require 'rspec/rails'\nrequire 'webmock/rspec'\nrequire 'support/vcr_setup'"
+gsub_file 'spec/rails_helper.rb', /require 'rspec\/rails'/, <<-'INSERT'
+require 'rspec/rails'
+require 'webmock/rspec'
+require 'support/vcr_setup'
+
+VCR.configure do |c|
+  c.configure_rspec_metadata!
+end
+
+INSERT
+
 create_file 'features/support/webmock.rb' do
 <<-'FILE'
 require 'webmock/cucumber'
@@ -145,6 +154,7 @@ require File.expand_path("../../../spec/support/vcr_setup", __FILE__)
 
 VCR.cucumber_tags do |t|
   t.tag  '@vcr', :use_scenario_name => true
+  t.tags '@vcr_new_episodes', :record => :new_episodes
 end
 FILE
 end

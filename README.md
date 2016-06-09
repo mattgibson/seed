@@ -23,7 +23,7 @@ Databases are created. Files are committed to git in their final state.
 
 ## Other requirements
 
-To create and run JavaScript Cucumber tests, tag the scenarios with 
+To create and run JavaScript Cucumber tests, tag the scenarios with
 `@javascript` and make sure you have PhantomJS installed:
 
 OSX: `brew install phantomjs`
@@ -33,12 +33,12 @@ OSX: `brew install phantomjs`
 See the `/features/support/general_steps.rb` file for handy Cucumber steps.
 
 If you have defined a model as `@model_name` in a previous step, then using
-`When I visit the edit model name page` will automatically follow the correct 
+`When I visit the edit model name page` will automatically follow the correct
 path.
 
 Add extra non-standard path names to `/features/support/paths.rb`
 
-## VCR 
+## VCR
 
 Use the @vcr tag on Cucumber features to cause a new casette to be created
 as `/fixtures/vcr_cassettes/feature_name/sceanrio_name.yml`

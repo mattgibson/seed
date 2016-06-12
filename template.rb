@@ -5,6 +5,7 @@ db_pass = ask('Postgres pass:')
 
 gem 'pg'
 gem 'haml-rails'
+gem 'react_on_rails'
 
 gem_group :develpment, :test do
   gem 'rspec-rails'
@@ -34,17 +35,13 @@ generate 'rspec:install'
 run 'bundle exec spring binstubs'
 
 # Get the templates for various files.
-%w(
-spec/smoke_spec.rb
-features/support/maintain_database.rb
-features/support/paths.rb
-features/step_definitions/general_steps.rb
-features/support/extra_env.rb
-features/support/webmock.rb
-spec/support/vcr_setup.rb
-features/support/vcr.rb
-).each do |file|
-  get "https://raw.github.com/mattgibson/seed/master/templates/#{file}", file
+base_pathname = Pathname.new(File.join(__dir__, 'templates'))
+template_files = Dir[File.join(__dir__, 'templates', '**', '*')].grep(/rb|json/)
+template_files.each do |file|
+  source_path = file
+  dest_path = Pathname.new(file).relative_path_from(base_pathname)
+  puts "copying from #{source_path} to #{dest_path}"
+  copy_file source_path, dest_path
 end
 
 # Edit a few files to add stuff we need.
@@ -78,4 +75,15 @@ after_bundle do
   git :init
   git add: '.'
   git commit: "-a -m 'Initial commit'"
+
+  generate 'react_on_rails:install' # Will not run with uncommitted code
+  run 'npm install'
 end
+
+puts 'OK. All done.'
+puts 'now try it out with:'
+puts "\n"
+puts 'cd yourapp'
+puts 'npm run rails-server'
+puts "\n"
+puts 'Then visit http://localhost:3000/hello_world'

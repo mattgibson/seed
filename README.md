@@ -6,10 +6,14 @@ the username and password for it, so ensure you have these details to hand.
 Database details will be added to the default section of `database.yml`, so
 the tests will run.
 
+You will also need npm installed.
+
 ```
 cd parent/directory
+git clone https://github.com/mattgibson/seed
 gem install rails
-rails new your_app_name -T -d postgresql -m 'https://raw.githubusercontent.com/mattgibson/seed/master/template.rb'
+gem install bundler
+rails new your_app_name -T -d postgresql -m 'seed/template.rb'
 ```
 
 ## What's installed

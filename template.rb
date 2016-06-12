@@ -34,16 +34,6 @@ generate 'rspec:install'
 
 run 'bundle exec spring binstubs'
 
-# Get the templates for various files.
-base_pathname = Pathname.new(File.join(__dir__, 'templates'))
-template_files = Dir[File.join(__dir__, 'templates', '**', '*')].grep(/rb|json/)
-template_files.each do |file|
-  source_path = file
-  dest_path = Pathname.new(file).relative_path_from(base_pathname)
-  puts "copying from #{source_path} to #{dest_path}"
-  copy_file source_path, dest_path
-end
-
 # Edit a few files to add stuff we need.
 gsub_file 'spec/rails_helper.rb',
           /^end/,
@@ -76,34 +66,59 @@ rake 'db:migrate', env: 'test'
 after_bundle do
   git :init
   git add: '.'
-  git commit: "-a -m 'Initial commit'"
+  git commit: "-a -m 'Initial commit after bundle install'"
 
   generate 'react_on_rails:install --redux' # Will not run with uncommitted code
   run 'npm install'
 
+  # Using the -J option from the command line means that the app layout does not
+  # include the default JS at all. This skips JQuery and sprockets as intended,
+  # but then does not include the webpack bundle, so we add it in here.
+  gsub_file 'app/views/layouts/application.html.erb',
+            '<%= csrf_meta_tags %>',
+            "<%= env_javascript_include_tag(static: 'webpack-bundle', \n"\
+            "                               hot: ['http://localhost:3500/vendor-bundle.js',\n"\
+            "                                     'http://localhost:3500/app-bundle.js']) %>\n"\
+            "  <%= csrf_meta_tags %>\n"
+
+  append_to_file 'config/initializers/assets.rb',
+                 'Rails.application.config.assets.precompile += %w( webpack-bundle.js )'
+  remove_file 'app/assets/javascripts/application.js'
+
+  # Add more advanced webpack config than the generator provides
+  remove_file 'client/webpack.config.js'
+  remove_file 'client/.babelrc'
+  gsub_file 'client/package.json',
+            '"build:production": "NODE_ENV=production webpack --config webpack.config.js"',
+            '"build:production": "NODE_ENV=production webpack --config webpack.prod.config.js"'
+  gsub_file 'client/package.json',
+            '"build:development": "webpack -w --config webpack.config.js"',
+            '"build:development": "webpack -w --config webpack.dev.config.js"'
+  gsub_file 'client/package.json',
+            '"build:test": "webpack --config webpack.config.js",',
+            '"build:test": "webpack --config webpack.test.config.js",'
+
+  # Get the templates for various files and add them to the new project.
+  base_pathname = Pathname.new(File.join(__dir__, 'templates'))
+  template_files = Dir[File.join(__dir__, 'templates', '**', '*')].reject { |path| File.directory?(path)}
+  template_files.each do |file|
+    source_path = file
+    dest_path = Pathname.new(file).relative_path_from(base_pathname)
+    puts "copying from #{source_path} to #{dest_path}"
+    copy_file source_path, dest_path
+  end
+
   git add: '.'
   git commit: "-a -m 'Add react_on_rails'"
+
+  3.times { puts "\n" }
+  puts 'OK. All done.'
+  puts 'now try it out with:'
+  puts "\n"
+  puts "cd #{@app_name}"
+  puts 'npm run rails-server'
+  puts "\n"
+  puts 'Then visit http://localhost:3000/hello_world'
+  3.times { puts "\n" }
+
 end
-
-# Using the -J option from the command line means that the app layout does not
-# include the JS at all. This skips JQuery and sprockets as we want, but does
-# not include all the webpack stuff we want.
-gsub_file 'app/views/layouts/application.html.erb',
-          '<%= csrf_meta_tags %>',
-          "<%= csrf_meta_tags %>\n"\
-          "  <%= javascript_include_tag 'webpack-bundle' %>\n"\
-          "  <% if Rails.env.development? %>\n"\
-          "    <script src=\" http://<%= request.host %>:3808/webpack-dev-server.js\"></script>\n"\
-          "  <% end %>\n"
-
-append_to_file 'config/initializers/assets.rb',
-               'Rails.application.config.assets.precompile += %w( webpack-bundle.js )'
-remove_file 'app/assets/javascripts/application.js'
-
-puts 'OK. All done.'
-puts 'now try it out with:'
-puts "\n"
-puts 'cd yourapp'
-puts 'npm run rails-server'
-puts "\n"
-puts 'Then visit http://localhost:3000/hello_world'

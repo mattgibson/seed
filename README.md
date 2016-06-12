@@ -13,7 +13,7 @@ cd parent/directory
 git clone https://github.com/mattgibson/seed
 gem install rails
 gem install bundler
-rails new your_app_name -T -d postgresql -m 'seed/template.rb'
+rails new your_app_name -T -J -d postgresql -m 'seed/template.rb'
 ```
 
 ## What's installed
@@ -22,8 +22,16 @@ rails new your_app_name -T -d postgresql -m 'seed/template.rb'
 * Cucumber
 * Rspec
 * Factory girl
+* React on Rails with Redux
 
 Databases are created. Files are committed to git in their final state.
+
+## Differences from standard Rails
+
+* Sprockets is disabled entirely
+* No JQuery or other JS gems are present. The won't work if added either. All
+  JS is handle via npm.
+* All JS and CSS is served from webpack
 
 ## Other requirements
 

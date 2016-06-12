@@ -64,6 +64,8 @@ gsub_file 'config/database.yml',
           'default: &default',
           "default: &default\n  user: #{db_username}\n  pass: #{db_pass}"
 
+application 'config.assets.enabled = false # Only use webpack for CSS and JS'
+
 # Set up the databases.
 rake 'db:create'
 rake 'db:migrate'
@@ -76,9 +78,27 @@ after_bundle do
   git add: '.'
   git commit: "-a -m 'Initial commit'"
 
-  generate 'react_on_rails:install' # Will not run with uncommitted code
+  generate 'react_on_rails:install --redux' # Will not run with uncommitted code
   run 'npm install'
+
+  git add: '.'
+  git commit: "-a -m 'Add react_on_rails'"
 end
+
+# Using the -J option from the command line means that the app layout does not
+# include the JS at all. This skips JQuery and sprockets as we want, but does
+# not include all the webpack stuff we want.
+gsub_file 'app/views/layouts/application.html.erb',
+          '<%= csrf_meta_tags %>',
+          "<%= csrf_meta_tags %>\n"\
+          "  <%= javascript_include_tag 'webpack-bundle' %>\n"\
+          "  <% if Rails.env.development? %>\n"\
+          "    <script src=\" http://<%= request.host %>:3808/webpack-dev-server.js\"></script>\n"\
+          "  <% end %>\n"
+
+append_to_file 'config/initializers/assets.rb',
+               'Rails.application.config.assets.precompile += %w( webpack-bundle.js )'
+remove_file 'app/assets/javascripts/application.js'
 
 puts 'OK. All done.'
 puts 'now try it out with:'
